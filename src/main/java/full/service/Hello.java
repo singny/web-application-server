@@ -1,0 +1,41 @@
+package full.service;
+
+import full.interfaces.HttpRequest;
+import full.interfaces.HttpResponse;
+import full.interfaces.SimpleServlet;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+public class Hello implements SimpleServlet {
+	private static final Logger logger = LoggerFactory.getLogger(Hello.class);
+
+    @Override
+    public void service(HttpRequest req, HttpResponse res) {
+        try {
+            Writer writer = res.getWriter();
+            writer.write("HTTP/1.1 200 OK\r\n"); // 상태 라인
+            writer.write("Content-Type: text/plain; charset=UTF-8\r\n"); // 헤더
+            writer.write("\r\n"); // 헤더와 바디를 구분하는 빈 줄
+
+            writer.write("Hello, ");
+            String name = req.getParameter("name");
+            if (name != null) {
+                String decodedName = URLDecoder.decode(name, StandardCharsets.UTF_8.name());
+                writer.write(decodedName);
+            } else {
+                writer.write("world");
+            }
+            writer.write("!");
+            writer.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

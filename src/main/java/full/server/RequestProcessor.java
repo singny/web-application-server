@@ -3,6 +3,7 @@ package full.server;
 import full.interfaces.HttpRequest;
 import full.interfaces.HttpResponse;
 import full.interfaces.SimpleServlet;
+import full.util.ServletMapper;
 
 import java.io.*;
 import java.net.Socket;
@@ -62,11 +63,12 @@ public class RequestProcessor implements Runnable {
             }
 
             // URL 서블릿 매핑
-            if (path.matches("^/([a-zA-Z_][\\w\\.]*)$")) {
-                String className = path.substring(1).replace("/", ".");
+            String className = ServletMapper.mapUrlToClass(path);
+            if (className != null) {
                 try {
-                    SimpleServlet servlet = (SimpleServlet) Class.forName("full.servlets." + className).getDeclaredConstructor().newInstance();
+                    SimpleServlet servlet = (SimpleServlet) Class.forName(className).getDeclaredConstructor().newInstance();
                     servlet.service(request, response);
+                    return;
                 } catch (ClassNotFoundException e) {
                     logger.error("Servlet class not found: {}", className, e);
                     sendErrorPage(response, 404, "HTTP/1.1 404 Not Found", hostConfig.errorPages.get(404));
@@ -74,14 +76,13 @@ public class RequestProcessor implements Runnable {
                     logger.error("Error processing servlet: {}", className, e);
                     sendErrorPage(response, 500, "HTTP/1.1 500 Internal Server Error", hostConfig.errorPages.get(500));
                 }
-                return;
             }
 
             // 파일 제공
             if (requestedFile.isDirectory()) {
                 requestedFile = new File(requestedFile, indexFileName);
             }
-
+            
             if (!requestedFile.exists() || !requestedFile.canRead()) {
                 logger.warn("File not found or not readable: {}", requestedFile.getPath());
                 sendErrorPage(response, 404, "HTTP/1.1 404 Not Found", hostConfig.errorPages.get(404));
@@ -94,7 +95,7 @@ public class RequestProcessor implements Runnable {
             response.setStatus(200);
             response.setHeader("Content-Type", contentType);
             response.setHeader("Content-Length", String.valueOf(fileData.length));
-            response.getWriter().write(new String(fileData));
+            response.htmlWrite(fileData);
             response.sendResponse();
         	
 //            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -216,7 +217,7 @@ public class RequestProcessor implements Runnable {
             response.setStatus(errorCode);
             response.setHeader("Content-Type", "text/html");
             response.setHeader("Content-Length", String.valueOf(errorData.length));
-            response.getWriter().write(new String(errorData));
+            response.htmlWrite(errorData);
         } else {
             response.setStatus(errorCode);
             response.getWriter().write("<html><body><h1>" + errorCode + " Error</h1></body></html>");

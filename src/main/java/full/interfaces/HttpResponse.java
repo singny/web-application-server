@@ -1,5 +1,6 @@
 package full.interfaces;
 
+import java.io.OutputStream;
 import java.io.Writer;
 
 public interface HttpResponse {
