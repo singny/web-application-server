@@ -6,11 +6,14 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestProcessor implements Runnable {
-    private static final Logger logger = Logger.getLogger(RequestProcessor.class.getCanonicalName());
+	private static final Logger logger = LoggerFactory.getLogger(RequestProcessor.class);
     private final Map<String, ServerConfig.HostConfig> virtualHosts;
     private final String indexFileName;
     private final Socket socket;
@@ -31,6 +34,7 @@ public class RequestProcessor implements Runnable {
             String line;
             
             String requestLine = reader.readLine();
+            logger.info("Request received: {}", requestLine);
 
             String[] tokens = requestLine.split("\\s+");
             String method = tokens[0];
@@ -49,6 +53,7 @@ public class RequestProcessor implements Runnable {
             ServerConfig.HostConfig hostConfig = virtualHosts.getOrDefault(host, virtualHosts.get("default"));
 
             if (hostConfig == null || hostConfig.rootDirectory == null) {
+            	logger.error("Host configuration or root directory not found for host: {}", host);
                 sendErrorPage(writer, rawOut, 500, version, hostConfig);
                 return;
             }
@@ -87,18 +92,19 @@ public class RequestProcessor implements Runnable {
                     rawOut.write(theData);
                     rawOut.flush();
                 } else {
+                	logger.warn("Requested file not found: {}", requestedFile.getCanonicalPath());
                     sendErrorPage(writer, rawOut, 404, version, hostConfig);
                 }
             } else {
                 sendErrorPage(writer, rawOut, 500, version, hostConfig);
             }
         } catch (IOException ex) {
-            logger.log(Level.WARNING, "Error talking to " + socket.getRemoteSocketAddress(), ex);
+        	logger.error("Error processing request", ex);
         } finally {
             try {
                 socket.close();
             } catch (IOException ex) {
-                logger.log(Level.WARNING, "Error closing socket", ex);
+            	logger.error("Error closing socket", ex);
             }
         }
     }
