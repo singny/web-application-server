@@ -20,9 +20,9 @@ public class Hello implements SimpleServlet {
     public void service(HttpRequest req, HttpResponse res) {
         try {
             Writer writer = res.getWriter();
-            writer.write("HTTP/1.1 200 OK\r\n"); // 상태 라인
-            writer.write("Content-Type: text/plain; charset=UTF-8\r\n"); // 헤더
-            writer.write("\r\n"); // 헤더와 바디를 구분하는 빈 줄
+            writer.write("HTTP/1.1 200 OK\r\n");
+            writer.write("Content-Type: text/plain; charset=UTF-8\r\n");
+            writer.write("\r\n");
 
             writer.write("Hello, ");
             String name = req.getParameter("name");

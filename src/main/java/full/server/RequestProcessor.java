@@ -78,7 +78,6 @@ public class RequestProcessor implements Runnable {
                 }
             }
 
-            // 파일 제공
             if (requestedFile.isDirectory()) {
                 requestedFile = new File(requestedFile, indexFileName);
             }
