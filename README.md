@@ -18,7 +18,7 @@
   src/main/resources/config.json
 
 ## 4. 다음과 같은 보안 규칙을 둡니다.
-- 구현여부 : <br/>
+- 구현여부 : △<br/>
   예, http://localhost:8000/../../../../etc/passwd -> url에 ..이 들어가면 403이 호출되도록 하였으나 브라우저에서 ../을 자동으로 삭제 후 요청을 보내 실현하지 못했습니다.
 - 예시 url(exe) : localhost:9090/test.exe
 - 관련파일<br/>
@@ -45,3 +45,11 @@
   src/main/java/full/interfaces/*<br/>
   src/main/java/full/service/CurrentTime.java
   
+## 8. 앞에서 구현한 여러 스펙을 검증하는 테스트 케이스를 JUnit4 를 이용해서 작성하세요.
+- 구현여부 : O
+- 관련파일<br/>
+  src/test/java/Misson1.java
+  src/test/java/Misson2.java
+  src/test/java/Misson3And4.java
+  src/test/java/Misson5.java
+  src/test/java/Misson6And7.java
